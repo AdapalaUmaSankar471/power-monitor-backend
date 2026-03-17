@@ -1,8 +1,0 @@
-<h1>Admin Dashboard</h1>
-
-<ul>
-<li>Manage Devices</li>
-<li>View Load Graph</li>
-<li>Manage Users</li>
-<li>Alerts</li>
-</ul>

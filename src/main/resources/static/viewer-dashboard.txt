@@ -1,6 +1,0 @@
-<h1>Viewer Dashboard</h1>
-
-<ul>
-<li>View Power Dashboard</li>
-<li>View Device Status</li>
-</ul>
