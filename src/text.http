@@ -1,0 +1,15 @@
+# POST http://localhost:8080/auth/login
+# Content-Type: application/json
+
+# {
+#   "username": "admin",
+#   "password": "admin123"
+# }
+
+POST http://localhost:8080/usage/add
+ Content-Type: application/json
+
+ {
+  "deviceId": 1,
+  "hoursUsed": 2
+}

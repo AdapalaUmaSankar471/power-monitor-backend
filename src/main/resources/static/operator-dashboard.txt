@@ -1,0 +1,6 @@
+<h1>Operator Dashboard</h1>
+
+<ul>
+<li>Turn Devices ON/OFF</li>
+<li>Monitor Power Load</li>
+</ul>

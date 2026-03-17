@@ -1,0 +1,217 @@
+#  GET http://localhost:8080/devices
+# POST http://localhost:8080/devices
+# Content-Type: application/json
+
+# {
+#   "name": "Fan",
+#   "powerRating": 75,
+#   "status": "ON"
+# }
+
+
+# GET http://localhost:8080/power
+# POST http://localhost:8080/power
+# Content-Type: application/json
+
+# {
+#   "deviceId": 1,
+#   "hoursUsed": 5
+# }
+
+# GET http://localhost:8080/load
+
+# GET http://localhost:8080/report
+
+
+# PUT http://localhost:8080/devices/1
+# Content-Type: application/json
+
+# {
+#   "status": "OFF"
+# }
+
+# DELETE http://localhost:8080/devices/1
+
+
+# POST http://localhost:8080/auth/login
+
+#   Content-Type: application/json
+#  {
+#     "username": "admin",
+#     "password": "admin123"
+#  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# POST http://localhost:8080/auth/register
+# Content-Type: application/json
+
+# {
+#   "username": "admin",
+#   "password": "1234",
+#   "role": "ADMIN"
+# }
+
+# POST http://localhost:8080/auth/login
+# Content-Type: application/json
+
+# {
+#   "username": "admin",
+#   "password": "1234"
+# }
+
+
+
+# GET http://localhost:8080/devices
+# Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc3MzQ4ODM5MiwiZXhwIjoxNzczNTc0NzkyfQ.wRUB6g8qUEcRyYPq-B-0wK00AsSDIyIu5N39LzP8vjA
+
+
+# POST http://localhost:8080/auth/register
+# Content-Type: application/json
+
+# {
+#  "username": "admin",
+#  "password": "1234",
+#  "role": "ADMIN"
+# }
+
+
+# POST http://localhost:8080/auth/login
+# Content-Type: application/json
+
+# {
+#  "username": "admin",
+#  "password": "1234"
+# }
+
+
+# POST http://localhost:8080/auth/register
+#  Content-Type: application/json
+
+# {
+#   "username": "admin",
+#   "password": "1234",
+#   "role": "ADMIN"
+# }
+
+# POST http://localhost:8080/devices/add
+#  Content-Type: application/json
+
+# {
+# "name":"Fan",
+# "powerRating":75,
+# "status":true
+# }
+
+# {
+#  "name":"AC",
+#  "powerRating":1500,
+#  "status":true
+# }
+
+# GET http://localhost:8080/devices/all
+#  Content-Type: application/json
+
+
+# GET http://localhost:8080/load/total
+# GET http://localhost:8080/load/status
+
+# GET http://localhost:8080/readings/all
+
+# POST http://localhost:8080/devices/add
+#  Content-Type: application/json
+
+# {
+#  "name": "Fan",
+#  "power": 75,
+#  "status": true
+# }
+
+# {
+#  "name": "AC",
+#  "power": 1500,
+#  "status": true
+# }
+
+# POST http://localhost:8080/auth/register
+#     Content-Type: application/json
+    
+# {
+#   "username": "admin",
+#   "password": "1234",
+#   "role": "ADMIN"
+# }    
+
+# {
+#  "username":"operator",
+#  "password":"1234",
+#  "role":"OPERATOR"
+# }
+
+# {
+#  "username":"viewer",
+#  "password":"1234",
+#  "role":"VIEWER"
+# }
+
+
+# POST http://localhost:8080/auth/login
+# Content-Type: application/json
+
+# {
+#   "username": "admin",
+#   "password": "1234"
+# }
+
+# PUT http://localhost:8080/devices/toggle/1
+
+# POST http://localhost:8080/usage/add
+# Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc3MzY2NzI5MiwiZXhwIjoxNzczNzUzNjkyfQ.nUqOaNVayu7rTWyt7lUU0UGeR8qJf2ajTR7exKeLr28
+# Content-Type: application/json
+
+# {
+#   "deviceId": 1,
+#   "hoursUsed": 5
+# }
+
+# POST http://localhost:8080/auth/login
+# Content-Type: application/json
+
+# {
+#   "username": "admin",
+#   "password": "admin123"
+# }
+
+# eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc3MzY2NzI5MiwiZXhwIjoxNzczNzUzNjkyfQ.nUqOaNVayu7rTWyt7lUU0UGeR8qJf2ajTR7exKeLr28
+
+# eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc3MzY2NzI5MiwiZXhwIjoxNzczNzUzNjkyfQ.nUqOaNVayu7rTWyt7lUU0UGeR8qJf2ajTR7exKeLr28
+
+POST http://localhost:8080/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
+}

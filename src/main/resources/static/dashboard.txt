@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Power Monitor Dashboard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+body{
+font-family: Arial;
+text-align:center;
+background:#f4f4f4;
+}
+
+.container{
+width:80%;
+margin:auto;
+}
+
+.card{
+background:white;
+padding:20px;
+margin:20px;
+border-radius:10px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+button{
+padding:6px 12px;
+margin-left:10px;
+border:none;
+background:#007bff;
+color:white;
+border-radius:5px;
+cursor:pointer;
+}
+
+button:hover{
+background:#0056b3;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>⚡ Smart Power Monitoring Dashboard</h1>
+
+<div class="container">
+
+<div class="card">
+<h2>Total Power Load</h2>
+<h1 id="loadValue">0 W</h1>
+</div>
+
+<div class="card">
+<h2>Power Usage Graph</h2>
+<canvas id="powerChart"></canvas>
+</div>
+
+<div class="card">
+<h2>Devices</h2>
+<div id="deviceList"></div>
+</div>
+
+</div>
+
+<script>
+
+/* ---------------- LOAD STATUS ---------------- */
+
+async function fetchLoad(){
+
+const response = await fetch("http://localhost:8080/load/status");
+
+const data = await response.json();
+
+document.getElementById("loadValue").innerText = data.totalLoad + " W";
+
+return data.totalLoad;
+
+}
+
+/* ---------------- GRAPH ---------------- */
+
+const ctx = document.getElementById('powerChart');
+
+const powerChart = new Chart(ctx, {
+type:'line',
+data:{
+labels:[],
+datasets:[{
+label:'Power Load',
+data:[],
+borderColor:'blue',
+fill:false
+}]
+}
+});
+
+async function updateChart(){
+
+const load = await fetchLoad();
+
+const time = new Date().toLocaleTimeString();
+
+powerChart.data.labels.push(time);
+powerChart.data.datasets[0].data.push(load);
+
+powerChart.update();
+
+}
+
+setInterval(updateChart,3000);
+
+
+/* ---------------- DEVICE LIST ---------------- */
+
+async function loadDevices(){
+
+const response = await fetch("http://localhost:8080/devices/all");
+
+const devices = await response.json();
+
+let html = "";
+
+devices.forEach(device => {
+
+html += `
+<p>
+<b>${device.name}</b> - ${device.power}W - 
+${device.status ? "ON" : "OFF"}
+<button onclick="toggleDevice(${device.id})">Toggle</button>
+</p>
+`;
+
+});
+
+document.getElementById("deviceList").innerHTML = html;
+
+}
+
+
+/* ---------------- TOGGLE DEVICE ---------------- */
+
+async function toggleDevice(id){
+
+await fetch("http://localhost:8080/devices/toggle/" + id,{
+method:"PUT"
+});
+
+loadDevices();
+
+}
+
+
+/* ---------------- INITIAL LOAD ---------------- */
+
+loadDevices();
+
+</script>
+
+</body>
+</html>
