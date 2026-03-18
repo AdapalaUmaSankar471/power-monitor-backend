@@ -14,9 +14,15 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:3000")
+                        .allowedOrigins(
+                            "http://localhost:3000",
+                            "https://power-monitor-frontend.vercel.app",
+                            "https://power-monitor-frontend-hqwtekorp-adapalaumasankars-projects.vercel.app",
+                            "https://power-monitor-frontend-m8s39hy3g-adapalaumasankars-projects.vercel.app"
+                        )
                         .allowedMethods("*")
-                        .allowedHeaders("*");
+                        .allowedHeaders("*")
+                        .allowCredentials(true);
             }
         };
     }
