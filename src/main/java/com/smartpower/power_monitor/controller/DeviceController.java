@@ -43,7 +43,6 @@ public class DeviceController {
         return deviceRepository.save(device);
     }
 
-    // Update monthly budget per device
     @PutMapping("/budget/{id}")
     public Device updateBudget(@PathVariable Long id, @RequestParam double budget) {
         Device device = deviceRepository.findById(id).orElseThrow();
@@ -57,7 +56,6 @@ public class DeviceController {
         Device device = deviceRepository.findById(id).orElseThrow();
         boolean wasOn = device.isStatus();
 
-        // If turning OFF — calculate usage time and add to total
         if (wasOn && device.getLastTurnedOn() != null) {
             long minutesOn = ChronoUnit.MINUTES.between(
                 device.getLastTurnedOn(), LocalDateTime.now()
@@ -66,7 +64,6 @@ public class DeviceController {
             device.setLastTurnedOn(null);
         }
 
-        // If turning ON — record start time
         if (!wasOn) {
             device.setLastTurnedOn(LocalDateTime.now());
         }
@@ -74,13 +71,11 @@ public class DeviceController {
         device.setStatus(!wasOn);
         deviceRepository.save(device);
 
-        // Activity Log
         ActivityLog log = new ActivityLog();
         log.setMessage(device.getName() + (device.isStatus() ? " turned ON" : " turned OFF"));
         log.setTimestamp(LocalDateTime.now());
         logRepository.save(log);
 
-        // PowerLog — total active load
         List<Device> allDevices = deviceRepository.findAll();
         double totalLoad = allDevices.stream()
                 .filter(Device::isStatus)
@@ -93,5 +88,11 @@ public class DeviceController {
         powerLogRepository.save(powerLog);
 
         return device;
+    }
+
+    // ✅ Delete endpoint
+    @DeleteMapping("/delete/{id}")
+    public void deleteDevice(@PathVariable Long id) {
+        deviceRepository.deleteById(id);
     }
 }
