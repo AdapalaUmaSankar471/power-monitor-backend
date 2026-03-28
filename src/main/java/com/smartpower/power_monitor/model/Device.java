@@ -1,65 +1,7 @@
-// package com.smartpower.power_monitor.model;
-
-// import jakarta.persistence.*;
-
-// @Entity
-// public class Device {
-
-//     @Id
-//     @GeneratedValue(strategy = GenerationType.IDENTITY)
-//     private Long id;
-
-//     private String name;
-
-//     private double powerRating;
-
-//     private boolean status;
-
-//     public Device() {}
-
-//     public Device(String name, double powerRating, boolean status) {
-//         this.name = name;
-//         this.powerRating = powerRating;
-//         this.status = status;
-//     }
-
-//     public Long getId() {
-//         return id;
-//     }
-
-//     public String getName() {
-//         return name;
-//     }
-
-//     public double getPowerRating() {
-//         return powerRating;
-//     }
-
-//     public boolean isStatus() {
-//         return status;
-//     }
-
-//     public void setId(Long id) {
-//         this.id = id;
-//     }
-
-//     public void setName(String name) {
-//         this.name = name;
-//     }
-
-//     public void setPowerRating(double powerRating) {
-//         this.powerRating = powerRating;
-//     }
-
-//     public void setStatus(boolean status) {
-//         this.status = status;
-//     }
-// }
-
-
 package com.smartpower.power_monitor.model;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 public class Device {
@@ -74,22 +16,43 @@ public class Device {
 
     private boolean status;
 
-    public Long getId(){ return id; }
+    // Monthly budget in Watt-hours (e.g., AC=3000, Fan=500)
+    private double monthlyBudget;
 
-    public String getName(){ return name; }
+    // Track when device was last turned ON
+    private LocalDateTime lastTurnedOn;
 
-    public void setName(String name){ this.name=name; }
+    // Total usage in minutes this month
+    private double totalUsageMinutes;
 
-    public int getPower(){ return power; }
+    public Long getId() { return id; }
 
-    public void setPower(int power){ this.power=power; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public boolean isStatus(){ return status; }
+    public int getPower() { return power; }
+    public void setPower(int power) { this.power = power; }
 
-    public void setStatus(boolean status){ this.status=status; }
+    public boolean isStatus() { return status; }
+    public void setStatus(boolean status) { this.status = status; }
+
+    public double getMonthlyBudget() { return monthlyBudget; }
+    public void setMonthlyBudget(double monthlyBudget) { this.monthlyBudget = monthlyBudget; }
+
+    public LocalDateTime getLastTurnedOn() { return lastTurnedOn; }
+    public void setLastTurnedOn(LocalDateTime lastTurnedOn) { this.lastTurnedOn = lastTurnedOn; }
+
+    public double getTotalUsageMinutes() { return totalUsageMinutes; }
+    public void setTotalUsageMinutes(double totalUsageMinutes) { this.totalUsageMinutes = totalUsageMinutes; }
+
+    // Actual consumption in Wh = (power * minutes) / 60
+    public double getActualConsumption() {
+        return (power * totalUsageMinutes) / 60.0;
+    }
+
+    // Budget percentage used
+    public double getBudgetUsedPercent() {
+        if (monthlyBudget <= 0) return 0;
+        return (getActualConsumption() / monthlyBudget) * 100;
+    }
 }
-
-
-
-
-

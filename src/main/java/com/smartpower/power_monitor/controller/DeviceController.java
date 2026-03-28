@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @CrossOrigin(origins = "*")
@@ -42,18 +43,44 @@ public class DeviceController {
         return deviceRepository.save(device);
     }
 
+    // Update monthly budget per device
+    @PutMapping("/budget/{id}")
+    public Device updateBudget(@PathVariable Long id, @RequestParam double budget) {
+        Device device = deviceRepository.findById(id).orElseThrow();
+        device.setMonthlyBudget(budget);
+        return deviceRepository.save(device);
+    }
+
     @PutMapping("/toggle/{id}")
     public Device toggleDevice(@PathVariable Long id) {
 
         Device device = deviceRepository.findById(id).orElseThrow();
-        device.setStatus(!device.isStatus());
+        boolean wasOn = device.isStatus();
+
+        // If turning OFF — calculate usage time and add to total
+        if (wasOn && device.getLastTurnedOn() != null) {
+            long minutesOn = ChronoUnit.MINUTES.between(
+                device.getLastTurnedOn(), LocalDateTime.now()
+            );
+            device.setTotalUsageMinutes(device.getTotalUsageMinutes() + minutesOn);
+            device.setLastTurnedOn(null);
+        }
+
+        // If turning ON — record start time
+        if (!wasOn) {
+            device.setLastTurnedOn(LocalDateTime.now());
+        }
+
+        device.setStatus(!wasOn);
         deviceRepository.save(device);
 
+        // Activity Log
         ActivityLog log = new ActivityLog();
         log.setMessage(device.getName() + (device.isStatus() ? " turned ON" : " turned OFF"));
         log.setTimestamp(LocalDateTime.now());
         logRepository.save(log);
 
+        // PowerLog — total active load
         List<Device> allDevices = deviceRepository.findAll();
         double totalLoad = allDevices.stream()
                 .filter(Device::isStatus)
