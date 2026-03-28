@@ -1,101 +1,70 @@
-// package com.smartpower.power_monitor.controller;
-
-// import com.smartpower.power_monitor.model.Device;
-// import com.smartpower.power_monitor.repository.DeviceRepository;
-// import org.springframework.web.bind.annotation.*;
-
-// import java.util.List;
-
-// @RestController
-// @RequestMapping("/devices")
-// public class DeviceController {
-
-//     private final DeviceRepository deviceRepository;
-
-//     public DeviceController(DeviceRepository deviceRepository) {
-//         this.deviceRepository = deviceRepository;
-//     }
-
-
-//     @PostMapping("/add")
-//     public Device addDevice(@RequestBody Device device) {
-//         return deviceRepository.save(device);
-//     }
-
-//     @GetMapping("/all")
-//     public List<Device> getDevices() {
-//         return deviceRepository.findAll();
-//     }
-
-//     @PutMapping("/toggle/{id}")
-//     public Device toggleDevice(@PathVariable Long id) {
-
-//         Device device = deviceRepository.findById(id).orElseThrow();
-
-//         device.setStatus(!device.isStatus());
-
-//         return deviceRepository.save(device);
-//     }
-// }
-
 package com.smartpower.power_monitor.controller;
 
 import com.smartpower.power_monitor.model.ActivityLog;
 import com.smartpower.power_monitor.model.Device;
+import com.smartpower.power_monitor.model.PowerLog;
 import com.smartpower.power_monitor.repository.ActivityLogRepository;
 import com.smartpower.power_monitor.repository.DeviceRepository;
+import com.smartpower.power_monitor.repository.PowerLogRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/devices")
-
 public class DeviceController {
 
-@Autowired
-private DeviceRepository deviceRepository;
+    @Autowired
+    private DeviceRepository deviceRepository;
 
-@Autowired
-private ActivityLogRepository logRepository;
+    @Autowired
+    private ActivityLogRepository logRepository;
 
-@GetMapping("/all")
-public List<Device> getDevices(){
-return deviceRepository.findAll();
-}
+    @Autowired
+    private PowerLogRepository powerLogRepository;
 
-@GetMapping("/logs")
-public List<ActivityLog> getLogs(){
-    return logRepository.findAll();
-}
+    @GetMapping("/all")
+    public List<Device> getDevices() {
+        return deviceRepository.findAll();
+    }
 
-@PostMapping("/add")
-public Device addDevice(@RequestBody Device device){
-return deviceRepository.save(device);
-}
+    @GetMapping("/logs")
+    public List<ActivityLog> getLogs() {
+        return logRepository.findAll();
+    }
 
-@PutMapping("/toggle/{id}")
-public Device toggleDevice(@PathVariable Long id){
+    @PostMapping("/add")
+    public Device addDevice(@RequestBody Device device) {
+        return deviceRepository.save(device);
+    }
 
-Device device = deviceRepository.findById(id).orElseThrow();
+    @PutMapping("/toggle/{id}")
+    public Device toggleDevice(@PathVariable Long id) {
 
-device.setStatus(!device.isStatus());
+        Device device = deviceRepository.findById(id).orElseThrow();
+        device.setStatus(!device.isStatus());
+        deviceRepository.save(device);
 
-deviceRepository.save(device);
+        ActivityLog log = new ActivityLog();
+        log.setMessage(device.getName() + (device.isStatus() ? " turned ON" : " turned OFF"));
+        log.setTimestamp(LocalDateTime.now());
+        logRepository.save(log);
 
-ActivityLog log = new ActivityLog();
+        List<Device> allDevices = deviceRepository.findAll();
+        double totalLoad = allDevices.stream()
+                .filter(Device::isStatus)
+                .mapToDouble(Device::getPower)
+                .sum();
 
-log.setMessage(device.getName() + (device.isStatus() ? " turned ON" : " turned OFF"));
+        PowerLog powerLog = new PowerLog();
+        powerLog.setTotalLoad(totalLoad);
+        powerLog.setTimestamp(LocalDateTime.now());
+        powerLogRepository.save(powerLog);
 
-log.setTimestamp(java.time.LocalDateTime.now());
-
-logRepository.save(log);
-
-return device;
-
-}
-
+        return device;
+    }
 }
