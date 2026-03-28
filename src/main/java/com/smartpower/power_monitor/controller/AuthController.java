@@ -3,9 +3,11 @@ package com.smartpower.power_monitor.controller;
 import com.smartpower.power_monitor.model.User;
 import com.smartpower.power_monitor.repository.UserRepository;
 import com.smartpower.power_monitor.dto.LoginResponse;
+import com.smartpower.power_monitor.dto.LoginRequest;
 import com.smartpower.power_monitor.security.JwtUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,76 +16,75 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins="*")
 public class AuthController {
 
-@Autowired
-private UserRepository userRepository;
+    @Autowired
+    private UserRepository userRepository;
 
-@Autowired
-private PasswordEncoder passwordEncoder;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
-@Autowired
-private JwtUtil jwtUtil;
+    @Autowired
+    private JwtUtil jwtUtil;
 
+    /////////////////////////////////////////////////////////
+    // REGISTER USER
+    /////////////////////////////////////////////////////////
+    @PostMapping("/register")
+    public User register(@RequestBody User user){
 
+        // ✅ CLEAN USERNAME
+        String username = user.getUsername().trim().toLowerCase();
 
-// REGISTER USER
-@PostMapping("/register")
-public User register(@RequestBody User user){
+        if(userRepository.findByUsername(username) != null){
+            throw new RuntimeException("Username already exists");
+        }
 
-    if(userRepository.findByUsername(user.getUsername())!=null){
-        throw new RuntimeException("Username already exists");
+        user.setUsername(username);
+        user.setPassword(passwordEncoder.encode(user.getPassword().trim()));
+        user.setRole("USER");
+
+        return userRepository.save(user);
     }
 
-    user.setPassword(passwordEncoder.encode(user.getPassword()));
-    user.setRole("USER");
+    /////////////////////////////////////////////////////////
+    // LOGIN (FINAL FIXED)
+    /////////////////////////////////////////////////////////
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginRequest request){
 
-    return userRepository.save(user);
-}
+        // ✅ SAFE CLEAN INPUT
+        String username = request.getUsername() != null 
+                ? request.getUsername().trim().toLowerCase() 
+                : "";
 
+        String password = request.getPassword() != null 
+                ? request.getPassword().trim() 
+                : "";
 
+        System.out.println("LOGIN USERNAME: " + username);
+        System.out.println("LOGIN PASSWORD: " + password);
 
-// CREATE ADMIN
-@PostMapping("/create-admin")
-public User createAdmin(@RequestBody User user){
+        // 🔍 FIND USER
+        User user = userRepository.findByUsername(username);
 
-    user.setPassword(passwordEncoder.encode(user.getPassword()));
-    user.setRole("ADMIN");
+        if(user == null){
+            return ResponseEntity.status(401).body("User not found");
+        }
 
-    return userRepository.save(user);
-}
+        // 🔐 PASSWORD CHECK (BCrypt)
+        if(!passwordEncoder.matches(password, user.getPassword())){
+            return ResponseEntity.status(401).body("Wrong password");
+        }
 
+        // 🔑 GENERATE TOKEN
+        String token = jwtUtil.generateToken(user.getUsername(), user.getRole());
 
+        // ✅ RESPONSE
+        LoginResponse response = new LoginResponse(
+                user.getUsername(),
+                user.getRole(),
+                token
+        );
 
-// CREATE ENERGY MANAGER
-@PostMapping("/create-manager")
-public User createManager(@RequestBody User user){
-
-    user.setPassword(passwordEncoder.encode(user.getPassword()));
-    user.setRole("ENERGY_MANAGER");
-
-    return userRepository.save(user);
-}
-
-
-
-// LOGIN
-@PostMapping("/login")
-public LoginResponse login(@RequestBody User login){
-
-    User user=userRepository.findByUsername(login.getUsername());
-
-    if(user==null)
-        throw new RuntimeException("User not found");
-
-    if(!passwordEncoder.matches(login.getPassword(),user.getPassword()))
-        throw new RuntimeException("Wrong password");
-
-    String token=jwtUtil.generateToken(user.getUsername(),user.getRole());
-
-    return new LoginResponse(
-            user.getUsername(),
-            user.getRole(),
-            token
-    );
-}
-
+        return ResponseEntity.ok(response);
+    }
 }
