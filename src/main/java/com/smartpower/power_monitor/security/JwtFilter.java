@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -22,8 +23,12 @@ import java.util.Collections;
 @Component
 public class JwtFilter extends OncePerRequestFilter {
 
-    private final String SECRET = "smartpowersecretkeysmartpowersecretkey";
-    private final Key key = Keys.hmacShaKeyFor(SECRET.getBytes());
+    @Value("${jwt.secret}")
+    private String secret;
+
+    private Key getKey() {
+        return Keys.hmacShaKeyFor(secret.getBytes());
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -38,19 +43,15 @@ public class JwtFilter extends OncePerRequestFilter {
             String token = header.substring(7);
 
             try {
-
                 Claims claims = Jwts.parserBuilder()
-                        .setSigningKey(key)
+                        .setSigningKey(getKey())
                         .build()
                         .parseClaimsJws(token)
                         .getBody();
 
                 String username = claims.getSubject();
-
-                // 🔥 Extract role from token
                 String role = claims.get("role", String.class);
 
-                // 🔥 Set Spring Security Authentication
                 UsernamePasswordAuthenticationToken auth =
                         new UsernamePasswordAuthenticationToken(
                                 username,
@@ -59,19 +60,15 @@ public class JwtFilter extends OncePerRequestFilter {
                         );
 
                 SecurityContextHolder.getContext().setAuthentication(auth);
-
-                // Optional: store in request
                 request.setAttribute("username", username);
                 request.setAttribute("role", role);
 
             } catch (Exception e) {
-
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.setContentType("application/json");
                 response.getWriter().write("{\"error\":\"Invalid or Expired Token\"}");
                 return;
             }
-
         }
 
         filterChain.doFilter(request, response);
